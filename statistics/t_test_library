@@ -1,0 +1,27 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
+
+# Read the data from the text file
+with open('/content/question1_Normal_ChickenRabbit.txt', 'r') as file:
+    lines = file.readlines()
+
+normal_iterations = []
+for line in lines:
+    parts = line.strip().split(', ')
+    normal_iterations.append(float(parts[1]))
+
+with open('/content/question1_Xavier_ChickenRabbit.txt', 'r') as file:
+    lines = file.readlines()
+
+xavier_iterations = []
+for line in lines:
+    parts = line.strip().split(', ')
+    xavier_iterations.append(float(parts[1]))
+
+# calculate
+t_statistic, p_value = stats.ttest_ind(normal_iterations, xavier_iterations, equal_var=False)
+print("T-statistic:", t_statistic)
+print("P-value:", p_value)
+
+# stats.levene(normal_iterations, xavier_iterations)

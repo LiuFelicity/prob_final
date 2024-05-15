@@ -1,3 +1,28 @@
+# What we did
+
+### For question 1-1
+We change run.py, let it run at least 100 times(most of which run 110 times) with random seed [0,100000] int , and record the seed and iterations.
+
+### For question 1-2
+We change run.py and model_multiplier.py.
+
+**run.py**
+Let it run at least 100 times(most of which run 110 times) with random weight_seed [0,100000] int, and record the seed and iterations.
+We tried 3 different system_init_seed: 62, 300, 1000.
+
+**model_multiplier.py**
+Use torch.nn.init.normal_(module.weight, mean=0, std=0.02) to change it from Xavier to Normal.
+
+# What we do to analyze
+
+### For question 1-1
+We tried two different ways to calculate p-value, using the formula taught in class and python scripy library.
+
+### For question 1-2
+We fisrt set the standard deviation that would make the order matter, and use hypothesis testing to check if data order matters or not.
+
+
+
 # 2024 Prob Final Project
 
 ### Code Tree Structure
