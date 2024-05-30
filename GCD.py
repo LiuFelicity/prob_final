@@ -5,6 +5,7 @@ import numpy as np
 import random
 import nltk
 import math
+import pickle
 
 np.set_printoptions(threshold=np.inf)
 
@@ -16,6 +17,17 @@ torch.set_printoptions(profile="full")
 from mingpt.utils import set_seed, setup_logging, CfgNode as CN
 # import setting
 import time
+
+
+sort_methods = (
+     (True, lambda train_data: 10*train_data[2]+train_data[3])
+    ,(True, lambda train_data: 10*train_data[4]+train_data[5])
+    ,(False, lambda train_data: 10*train_data[2]+train_data[3])  
+    ,(False, lambda train_data: 10*train_data[4]+train_data[5])
+    ,(True, lambda train_data: 10*train_data[0]+train_data[1])
+    ,(False, lambda train_data: 10*train_data[0]+train_data[1]) 
+)
+    
 
 class GCDDataset(Dataset):
 
@@ -53,7 +65,7 @@ class GCDDataset(Dataset):
                 prime_data.append(tmp)
         return data, prime_data
     
-    def __init__(self, config, split, seed):
+    def __init__(self, config, split, seed, idx):
         self.seed = seed
         self.config = config
         self.split = split # train/test
@@ -73,6 +85,16 @@ class GCDDataset(Dataset):
         num_test = min(int(len(data)*0.2), 500) - len(test_data) # 20% of the whole dataset, or only up to 500
         test_data = test_data + data[:num_test]
         train_data = train_data + data[num_test:]
+
+        train_data.sort(reverse = sort_methods[idx][0], key=sort_methods[idx][1])
+        train_zigzag = []
+        for i in range(0, len(train_data), 2):
+            train_zigzag.append(train_data[i])
+        for i in reversed(range(1, len(train_data), 2)):
+            train_zigzag.append(train_data[i])
+        train_data = train_zigzag
+        #with open(f"q2_GCD_sort_by_index_{idx}_increasing.pickle",'wb') as file:
+        #    pickle.dump(train_data, file)
 
         test_data = torch.tensor(test_data, dtype=torch.long)
         train_data = torch.tensor(train_data, dtype=torch.long)

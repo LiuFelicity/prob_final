@@ -7,8 +7,8 @@ import nltk
 np.set_printoptions(threshold=np.inf)
 
 import torch
-from ChickenRabbit import ChickenRabbitDataset, eval_split
-# from GCD import GCDDataset, eval_split
+# from ChickenRabbit import ChickenRabbitDataset, eval_split
+from GCD import GCDDataset, eval_split
 from torch.utils.data.dataloader import DataLoader
 torch.set_printoptions(profile="full")
 
@@ -18,6 +18,7 @@ from mingpt.utils import set_seed, setup_logging, CfgNode as CN
 from itertools import permutations
 
 # -----------------------------------------------------------------------------
+seed_weight = 0
 
 def get_config():
     C = CN()
@@ -25,11 +26,12 @@ def get_config():
     # system
     C.system = CN()
     # TODO: random seed for model can be set here
-    C.system.init_seed = 62 # will change the weight initialization     # try 0~9
+    global seed_weight
+    C.system.init_seed = seed_weight  # will change the weight initialization     # try 0~9
     C.system.work_dir = './test'
 
     # data
-    C.data = ChickenRabbitDataset.get_default_config()
+    C.data = GCDDataset.get_default_config()
 
     # model
     C.model = GPT.get_default_config()
@@ -65,28 +67,38 @@ def batch_end_callback(trainer, model, train_dataset, test_dataset):
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    arr = []
+    # Do it 110 times to avoid repeated seed
+    for  seed_weight in range(10):
+        config = get_config()
+        setup_logging(config)
 
-    config = get_config()
-    setup_logging(config)
+        # TODO: try different seed for model
+        
+        set_seed(config.system.init_seed)
+        # set_seef(_seed)
 
-    # TODO: try different seed for model
-    set_seed(config.system.init_seed)
+        # TODO: try different seed to adjust the data order of train/test-set
+        _seed = 0 #random.randint(1, 1000000)
+        train_dataset = GCDDataset(config.data, split='train', seed=_seed)
+        test_dataset  = GCDDataset(config.data, split='test', seed=_seed)
 
-    # TODO: try different seed to adjust the data order of train/test-set
-    train_dataset = ChickenRabbitDataset(config.data, split='train', seed=0)
-    test_dataset  = ChickenRabbitDataset(config.data, split='test', seed=0)
+        # set the correct vocab size: 10, block size: chickenrabbit -> 10, gcd -> 6
+        config.model.vocab_size = 10 # train_dataset.get_vocab_size()
+        config.model.block_size = 6 # train_dataset.get_block_size()
+        model = GPT(config.model)
+        trainer = Trainer(config.trainer, model, train_dataset, test_dataset)
+        trainer.set_callback('on_batch_end', batch_end_callback)
+        stop_iteration = trainer.run()
+        if stop_iteration != -1:
+            print(f'The final iteration of this round is {stop_iteration}!')
+        else:
+            print('It cannot reach 0.9 acc within max_iteration steps...')
+        
+        # store I need {seed, iteration number}
+        f = open("q2_GCD_sort_by_a.txt", "a")
+        f.write(f"{seed_weight}, {stop_iteration}\n")
+        f.close()
 
-    # set the correct vocab size: 10, block size: chickenrabbit -> 10, gcd -> 6
-    config.model.vocab_size = train_dataset.get_vocab_size()
-    config.model.block_size = train_dataset.get_block_size()
-    model = GPT(config.model)
-    trainer = Trainer(config.trainer, model, train_dataset, test_dataset)
-    trainer.set_callback('on_batch_end', batch_end_callback)
-    stop_iteration = trainer.run()
-    if stop_iteration != -1:
-        print(f'The final iteration of this round is {stop_iteration}!')
-    else:
-        print('It cannot reach 0.9 acc within max_iteration steps...')
-
-
-    
+        arr.append( (seed_weight, stop_iteration) )
+    print(arr)
