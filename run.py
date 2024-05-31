@@ -7,8 +7,8 @@ import nltk
 np.set_printoptions(threshold=np.inf)
 
 import torch
-# from ChickenRabbit import ChickenRabbitDataset, eval_split
-from GCD import GCDDataset, eval_split
+from ChickenRabbit import ChickenRabbitDataset, eval_split
+# from GCD import GCDDataset, eval_split
 from torch.utils.data.dataloader import DataLoader
 torch.set_printoptions(profile="full")
 
@@ -32,7 +32,7 @@ def get_config():
     C.system.work_dir = './test'
 
     # data
-    C.data = GCDDataset.get_default_config()
+    C.data = ChickenRabbitDataset.get_default_config()
 
     # model
     C.model = GPT.get_default_config()
@@ -69,7 +69,7 @@ def batch_end_callback(trainer, model, train_dataset, test_dataset):
 
 if __name__ == '__main__':
     arr = []
-    for _idx in range(6):
+    for _idx in range(8):
         # Do it 110 times to avoid repeated seed
         for  seed_weight in range(10):
             config = get_config()
@@ -82,15 +82,15 @@ if __name__ == '__main__':
 
             # TODO: try different seed to adjust the data order of train/test-set
             _seed = 0 #random.randint(1, 1000000)
-            train_dataset = GCDDataset(config.data, split='train', seed=_seed, idx=_idx)
+            train_dataset = ChickenRabbitDataset(config.data, split='train', seed=_seed, idx=_idx)
             # with open(f"q2_GCD_sort_by_index_{_idx}_increasing.pickle",'wb') as file:
             #    pickle.dump(train_dataset.ixes, file)
             
-            test_dataset  = GCDDataset(config.data, split='test', seed=_seed, idx=_idx)
+            test_dataset  = ChickenRabbitDataset(config.data, split='test', seed=_seed, idx=_idx)
             
             # set the correct vocab size: 10, block size: chickenrabbit -> 10, gcd -> 6
             config.model.vocab_size = 10 # train_dataset.get_vocab_size()
-            config.model.block_size = 6 # train_dataset.get_block_size()
+            config.model.block_size = 10 # train_dataset.get_block_size()
             model = GPT(config.model)
             trainer = Trainer(config.trainer, model, train_dataset, test_dataset)
             trainer.set_callback('on_batch_end', batch_end_callback)
@@ -101,7 +101,7 @@ if __name__ == '__main__':
                 print('It cannot reach 0.9 acc within max_iteration steps...')
             
             # store I need {seed, iteration number}
-            f = open(f"q2_GCD_sort_by_index_{_idx}_z.txt", "a")
+            f = open(f"q2_CR_sort_by_index_{_idx}.txt", "a")
             f.write(f"{seed_weight}, {stop_iteration}\n")
             f.close()
 
