@@ -17,7 +17,7 @@ from mingpt.trainer_multiplier import Trainer
 from mingpt.utils import set_seed, setup_logging, CfgNode as CN
 from itertools import permutations
 
-#import pickle
+import pickle
 # -----------------------------------------------------------------------------
 seed_weight = 0
 
@@ -69,7 +69,7 @@ def batch_end_callback(trainer, model, train_dataset, test_dataset):
 
 if __name__ == '__main__':
     arr = []
-    for _idx in range(8):
+    for _idx in range(4):
         # Do it 110 times to avoid repeated seed
         for  seed_weight in range(10):
             config = get_config()
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             # TODO: try different seed to adjust the data order of train/test-set
             _seed = 0 #random.randint(1, 1000000)
             train_dataset = ChickenRabbitDataset(config.data, split='train', seed=_seed, idx=_idx)
-            # with open(f"q2_GCD_sort_by_index_{_idx}_increasing.pickle",'wb') as file:
+            #with open(f"q2_CR_sort_by_index_{_idx}_zzz.pickle",'wb') as file:
             #    pickle.dump(train_dataset.ixes, file)
             
             test_dataset  = ChickenRabbitDataset(config.data, split='test', seed=_seed, idx=_idx)
@@ -107,4 +107,5 @@ if __name__ == '__main__':
 
             arr.append( (seed_weight, stop_iteration) )
         print(arr)
+        
         

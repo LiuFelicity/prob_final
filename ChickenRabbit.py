@@ -60,8 +60,8 @@ class ChickenRabbitDataset(Dataset):
 
         train_data = perm[num_test:].tolist()
         train_data.sort(reverse = sort_methods[idx][0], key=sort_methods[idx][1])
-        train_data = torch.tensor(train_data, dtype=torch.long)
-        '''
+        
+        ''' updown
         train_zigzag = []
         for i in range(0, len(train_data), 2):
             train_zigzag.append(train_data[i])
@@ -69,6 +69,18 @@ class ChickenRabbitDataset(Dataset):
             train_zigzag.append(train_data[i])
         train_data = train_zigzag
         '''
+
+        
+        train_zigzag = [None] * len(train_data)
+        for i in range(len(train_data)):
+            if i%2==0:
+                train_zigzag[i]=train_data[i//2]
+            else:
+                train_zigzag[i]=train_data[len(train_data) - i//2 -1]
+        train_data = train_zigzag
+        
+        train_data = torch.tensor(train_data, dtype=torch.long)
+
         self.ixes = perm[:num_test] if split == 'test' else train_data #perm[num_test:]
 
     def get_vocab_size(self):

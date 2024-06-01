@@ -87,14 +87,21 @@ class GCDDataset(Dataset):
         train_data = train_data + data[num_test:]
 
         train_data.sort(reverse = sort_methods[idx][0], key=sort_methods[idx][1])
+        '''
         train_zigzag = []
         for i in range(0, len(train_data), 2):
             train_zigzag.append(train_data[i])
         for i in reversed(range(1, len(train_data), 2)):
             train_zigzag.append(train_data[i])
         train_data = train_zigzag
-        #with open(f"q2_GCD_sort_by_index_{idx}_increasing.pickle",'wb') as file:
-        #    pickle.dump(train_data, file)
+        '''
+        train_zigzag = [None] * len(train_data)
+        for i in range(len(train_data)):
+            if i%2==0:
+                train_zigzag[i]=train_data[i//2]
+            else:
+                train_zigzag[i]=train_data[len(train_data) - i//2 -1]
+        train_data = train_zigzag
 
         test_data = torch.tensor(test_data, dtype=torch.long)
         train_data = torch.tensor(train_data, dtype=torch.long)
