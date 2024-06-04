@@ -20,14 +20,32 @@ import time
 
 
 sort_methods = (
-     (True, lambda train_data: 10*train_data[2]+train_data[3])
+    (False, lambda train_data: sum([(11**i)*train_data[i] for i in range(6)])) 
+    ,(True, lambda train_data: 10*train_data[2]+train_data[3])
     ,(True, lambda train_data: 10*train_data[4]+train_data[5])
     ,(False, lambda train_data: 10*train_data[2]+train_data[3])  
     ,(False, lambda train_data: 10*train_data[4]+train_data[5])
     ,(True, lambda train_data: 10*train_data[0]+train_data[1])
-    ,(False, lambda train_data: 10*train_data[0]+train_data[1]) 
+    ,(False, lambda train_data: 10*train_data[0]+train_data[1])
 )
-    
+
+### this is done by myself
+def shuffle(l):
+    n = len(l)
+    if n<=1:
+        return l
+    mid = n // 2
+    ll = l[0:mid]
+    lr = l[mid:n]
+    shuffle(ll)
+    shuffle(lr)
+    l = ll + lr
+    return l
+
+
+### end 
+
+
 
 class GCDDataset(Dataset):
 
@@ -95,13 +113,16 @@ class GCDDataset(Dataset):
             train_zigzag.append(train_data[i])
         train_data = train_zigzag
         '''
-        train_zigzag = [None] * len(train_data)
-        for i in range(len(train_data)):
-            if i%2==0:
-                train_zigzag[i]=train_data[i//2]
-            else:
-                train_zigzag[i]=train_data[len(train_data) - i//2 -1]
-        train_data = train_zigzag
+        shuffle(train_data)
+        
+
+        # train_zigzag = [None] * len(train_data)
+        # for i in range(len(train_data)):
+        #     if i%2==0:
+        #         train_zigzag[i]=train_data[i//2]
+        #     else:
+        #         train_zigzag[i]=train_data[len(train_data) - i//2 -1]
+        # train_data = train_zigzag
 
         test_data = torch.tensor(test_data, dtype=torch.long)
         train_data = torch.tensor(train_data, dtype=torch.long)

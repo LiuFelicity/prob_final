@@ -14,7 +14,8 @@ torch.set_printoptions(profile="full")
 from mingpt.utils import set_seed, setup_logging, CfgNode as CN
 
 sort_methods = (
-     (False, lambda train_data: 100*train_data[0]+10*train_data[1]+train_data[2])
+    (False, lambda train_data: sum([(10**(9-i))*train_data[i] for i in range(10)])) 
+    ,(False, lambda train_data: 100*train_data[0]+10*train_data[1]+train_data[2])
     ,(False, lambda train_data: 100*train_data[3]+10*train_data[4]+train_data[5])
     ,(False, lambda train_data: 10*train_data[6]+train_data[7])  
     ,(False, lambda train_data: 10*train_data[8]+train_data[9])
@@ -23,6 +24,22 @@ sort_methods = (
     ,(True, lambda train_data: 10*train_data[6]+train_data[7])  
     ,(True, lambda train_data: 10*train_data[8]+train_data[9])
 )
+
+### this is done by myself
+def shuffle(l):
+    n = len(l)
+    if n<=1:
+        return l
+    mid = n // 2
+    ll = l[0:mid]
+    lr = l[mid:n]
+    shuffle(ll)
+    shuffle(lr)
+    l = ll + lr
+    return l
+
+
+### end 
 
 class ChickenRabbitDataset(Dataset):
 
@@ -69,15 +86,15 @@ class ChickenRabbitDataset(Dataset):
             train_zigzag.append(train_data[i])
         train_data = train_zigzag
         '''
-
+        shuffle(train_data)
         
-        train_zigzag = [None] * len(train_data)
-        for i in range(len(train_data)):
-            if i%2==0:
-                train_zigzag[i]=train_data[i//2]
-            else:
-                train_zigzag[i]=train_data[len(train_data) - i//2 -1]
-        train_data = train_zigzag
+        # train_zigzag = [None] * len(train_data)
+        # for i in range(len(train_data)):
+        #     if i%2==0:
+        #         train_zigzag[i]=train_data[i//2]
+        #     else:
+        #         train_zigzag[i]=train_data[len(train_data) - i//2 -1]
+        # train_data = train_zigzag
         
         train_data = torch.tensor(train_data, dtype=torch.long)
 
