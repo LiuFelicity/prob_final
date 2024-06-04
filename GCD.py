@@ -34,15 +34,19 @@ def shuffle(l):
     n = len(l)
     if n<=1:
         return l
-    mid = n // 2
-    ll = l[0:mid]
-    lr = l[mid:n]
-    shuffle(ll)
-    shuffle(lr)
+    ll = shuffle(l[0::2])
+    lr = shuffle(l[1::2])
     l = ll + lr
     return l
-
-
+def shuffler(l):
+    n = len(l)
+    if n<=1:
+        return l
+    ll = shuffler(l[0::2])
+    lr = shuffler(l[1::2])
+    l = ll + lr
+    l.reverse()
+    return l
 ### end 
 
 
@@ -113,7 +117,7 @@ class GCDDataset(Dataset):
             train_zigzag.append(train_data[i])
         train_data = train_zigzag
         '''
-        shuffle(train_data)
+        shuffler(train_data)
         
 
         # train_zigzag = [None] * len(train_data)
